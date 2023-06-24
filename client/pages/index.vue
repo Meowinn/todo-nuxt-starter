@@ -1,120 +1,100 @@
 <template>
-	<v-container>
-		<h2>
-			<v-icon icon="mdi-vuetify" />
-			Starter Template
-		</h2>
-		<h5>Nuxt 3 / Vuetify / Graphql / Pinia</h5>
-		<h3 class="my-5">
-			Example Pinia
-			<v-chip color="blue">useCounter</v-chip>
-		</h3>
-		<v-card class="mx-auto my-12" max-width="374">
-			<v-card-title class="text-blue">Pinia useCounter()</v-card-title>
-			<v-card-item>
-				<v-card-text>
-					<v-chip>count:</v-chip>
-					{{ store.count }}
-				</v-card-text>
-				<v-card-text>
-					<v-chip>doubleCount:</v-chip>
-					{{ store.doubleCount }}
-				</v-card-text>
-			</v-card-item>
+	<v-app>
+		<h2>Todo Starter</h2>
 
-			<v-card-actions><v-btn color="blue" @click="store.increment()">Increment</v-btn></v-card-actions>
-		</v-card>
+		<v-card width="500" class="mx-auto">
+			<v-card-title class="pb-0">{{ days[day] }}, {{ date }}</v-card-title>
+			<v-card-subtitle>{{ months[currentDate.getMonth()] }}</v-card-subtitle>
+			<v-container fluid>
+				<v-form @submit.prevent>
+					<v-text-field v-model="modelTask.newTask" :rules="modelTask.rules" density="compact" clearable
+						label="Your tasks" type="text" variant="outlined">
+						<template #append>
+							<v-btn icon="mdi-plus" @click="addNewTask" type="submit"></v-btn>
+						</template>
+					</v-text-field>
+				</v-form>
 
-		<h3 class="my-5">
-			Example Vuetify
-			<v-chip color="blue">Card</v-chip>
-		</h3>
-		<v-card class="mx-auto my-12" max-width="374">
-			<template #progress>
-				<v-progress-linear color="deep-purple" height="10" indeterminate />
-			</template>
-
-			<v-img height="250" src="https://cdn.vuetifyjs.com/images/cards/cooking.png" />
-
-			<v-card-title>Cafe Badilico</v-card-title>
+			</v-container>
 
 			<v-card-text>
-				<v-row align="center" class="mx-0">
-					<v-rating :value="4.5" color="amber" dense half-increments readonly size="14" />
-
-					<div class="grey--text ms-4">4.5 (413)</div>
-				</v-row>
-
-				<div class="my-4 text-subtitle-1">$ • Italian, Cafe</div>
-
-				<div>
-					Small plates, salads & sandwiches - an intimate setting with 12 indoor seats plus patio
-					seating.
-				</div>
+				<v-list-item class="ma-0 pa-0" link :ripple="false" v-for="(allTask, index) in allTasks" :key="index">
+					<v-checkbox v-model="allTask.isDone" color="red">
+						<template #label>
+							<p :class="allTask.isDone ? 'strike' : ''">{{ allTask.task }}, {{ allTask.id }}</p>
+						</template>
+					</v-checkbox>
+				</v-list-item>
+				<!-- <v-checkbox :label="checkbox.toString()" v-model="checkbox"></v-checkbox> -->
 			</v-card-text>
 
-			<v-divider class="mx-4" />
-
-			<v-card-title>Tonight's availability</v-card-title>
-
-			<v-card-text>
-				<v-chip-group v-model="selection" active-class="deep-purple accent-4 white--text" column>
-					<v-chip>5:30PM</v-chip>
-
-					<v-chip>7:30PM</v-chip>
-
-					<v-chip>8:00PM</v-chip>
-
-					<v-chip>9:00PM</v-chip>
-				</v-chip-group>
-			</v-card-text>
-
-			<v-card-actions>
-				<v-btn color="deep-purple lighten-2">Reserve</v-btn>
-			</v-card-actions>
 		</v-card>
-		<h3 class="my-5">
-			Example Vuetify
-			<v-chip color="blue">SimpleTable</v-chip>
-			<v-chip color="orange">Data from spaceX graphql</v-chip>
-		</h3>
-		<p>There are {{ ships?.length || 0 }} ships.</p>
-		<v-table>
-			<thead>
-				<tr>
-					<th class="text-left">Name</th>
-					<th class="text-left">Active</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr v-for="ship in ships" :key="ship.name">
-					<td>{{ ship.name }}</td>
-					<td>
-						<v-chip :color="ship.active ? 'green' : 'red'">{{ ship.active }}</v-chip>
-					</td>
-				</tr>
-			</tbody>
-		</v-table>
-	</v-container>
+
+	</v-app>
 </template>
 <script lang="ts" setup>
-const store = useCounter()
-const selection = ref(0)
-const query = gql`
-	query getShips {
-		ships {
-			id
-			name
-			active
-		}
+
+const currentDate = new Date();
+const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+let day = currentDate.getDay();
+const date = `${currentDate.getDate()}th`
+
+const id = ref(4)
+
+const modelTask = reactive({
+	newTask: '',
+	rules: [
+		value => {
+			if (value) return true
+			return 'Enter a task'
+		},
+	],
+})
+
+const allTasks = reactive([
+	{
+		id: 1,
+		isDone: false,
+		task: 'Doing laundry'
+	},
+	{
+		id: 2,
+		isDone: false,
+		task: 'Meet with the Kardashians'
+	},
+	{
+		id: 3,
+		isDone: false,
+		task: 'Join chef ratata'
+	},
+])
+
+const checkbox = ref(false);
+
+function addNewTask() {
+	const addedTask = {
+		id: id.value++,
+		isDone: false,
+		task: modelTask.newTask,
 	}
-`
-const { data } = useAsyncQuery<{
-	ships: {
-		id: String
-		name: String
-		active: Boolean
+
+
+	if (modelTask.newTask == '') {
+		return
+	} else {
+		allTasks.push(addedTask)
+		modelTask.newTask = ''
 	}
-}>(query)
-const ships = computed(() => data.value?.ships ?? [])
+
+	console.log(addedTask)
+}
+
+
 </script>
+
+<style scoped>
+.strike {
+	text-decoration: line-through;
+}
+</style>
