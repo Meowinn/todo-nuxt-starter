@@ -21,9 +21,13 @@
 				<v-list-item class="ma-0 pa-0" link :ripple="false" v-for="(allTask, index) in allTasks" :key="index">
 					<v-checkbox v-model="allTask.isDone" color="red">
 						<template #label>
-							<p :class="allTask.isDone ? 'strike' : ''">{{ allTask.task }}, {{ allTask.id }}</p>
+								<p :class="allTask.isDone ? 'strike' : ''" class="align-self-center">{{ allTask.task }}, {{ allTask.id }}</p>
+						</template>
+						<template #append>
+							<v-btn variant="text" icon="mdi-close" color="error" size="small" @click="deleteTask(allTask.id)"></v-btn>
 						</template>
 					</v-checkbox>
+					
 				</v-list-item>
 				<!-- <v-checkbox :label="checkbox.toString()" v-model="checkbox"></v-checkbox> -->
 			</v-card-text>
@@ -88,6 +92,11 @@ function addNewTask() {
 	}
 
 	console.log(addedTask)
+}
+
+function deleteTask(allTaskId: any) {
+	// allTasks.filter(task => task.id !== data.id)
+	allTasks.splice(allTasks.findIndex(task => task.id === allTaskId), 1)
 }
 
 
